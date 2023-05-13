@@ -1,0 +1,25 @@
+﻿@using Dev.NetCore.Identity.Extensions
+@{
+    ViewData["Title"] = "Privacy Policy";
+}
+<h1>@ViewData["Title"]</h1>
+
+<p>Esta view mostra como implementar Claims do identyty Customizada</p>
+
+<p>Chamado a View TesteFiltroClaimPersonalizado</p>
+
+@{
+    if (this.IfClaim("Produtos", "Adicionar"))
+    {
+        <p>Pra visualizar precisa ter permissão de Adcionar</p>
+    }
+}
+
+<div>
+
+    @Html.ActionLink("Mostrar se Tiver Permissão", "TesteFiltroClaimPersonalizado").IfClaimShow(Context, "Produtos", "Adicionar");
+</div>
+
+<div>
+    <a href="#" class="btn btn-danger" @Html.Raw(this.IfClaimShow("Produtos", "Adicionar")) >content</a>
+</div>
