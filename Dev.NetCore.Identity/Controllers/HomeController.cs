@@ -45,10 +45,19 @@ namespace Dev.NetCore.Identity.Controllers
             return View();
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        [Route("Error/{id:Length(3,3)}")]
+        public IActionResult Error(int id)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var modelErro = new ErrorViewModel();
+            if (id == 500)
+            {
+                modelErro.Mensagem = "Ocorreu um erro interno.";
+                modelErro.Titulo = "Erro Inesperado";
+                modelErro.ErroCode = id.ToString();
+
+            }
+
+            return View("Error");
         }
     }
 }
