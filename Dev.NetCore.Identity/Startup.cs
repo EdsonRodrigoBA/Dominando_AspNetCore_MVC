@@ -1,10 +1,15 @@
 using Dev.NetCore.Identity.Configs;
+using KissLog.AspNetCore;
+using KissLog.CloudListeners.Auth;
+using KissLog.CloudListeners.RequestLogsListener;
+using KissLog.Formatters;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.Internal;
+using System;
 
 namespace Dev.NetCore.Identity
 {
@@ -35,6 +40,7 @@ namespace Dev.NetCore.Identity
 
             services.AddAuthorizationConfig();
             services.ResolveDepencies();
+
         }
             
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -57,6 +63,10 @@ namespace Dev.NetCore.Identity
             app.UseAuthentication();
 
             app.UseAuthorization();
+
+            app.UseKissLogMiddleware(options => {
+                LogConfig.RegisterKissLogListeners(options, Configuration);
+            });
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
@@ -65,6 +75,7 @@ namespace Dev.NetCore.Identity
                 endpoints.MapRazorPages();
 
             });
+
         }
     }
 }

@@ -1,5 +1,8 @@
 ﻿using Dev.NetCore.Identity.Areas.Identity.Data;
 using Dev.NetCore.Identity.Extensions;
+using KissLog;
+using KissLog.AspNetCore;
+using KissLog.Formatters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -17,21 +20,29 @@ namespace Dev.NetCore.Identity.Configs
         public static IServiceCollection ResolveDepencies(this IServiceCollection services)
         {
             services.AddSingleton<IAuthorizationHandler, PermissaoNecessariaHandler>();
+            services.AddHttpContextAccessor();
+            services.AddScoped<IKLogger>((provider) => Logger.Factory.Get());
+            services.AddScoped<AuditoriaFilter>();
+            services.AddLogging(provider =>
+            {
+                provider
+                    .AddKissLog(options =>
+                    {
+                        options.Formatter = (FormatterArgs args) =>
+                        {
+                            if (args.Exception == null)
+                                return args.DefaultValue;
+
+                            string exceptionStr = new ExceptionFormatter().Format(args.Exception, args.Logger);
+                            return string.Join(Environment.NewLine, new[] { args.DefaultValue, exceptionStr });
+                        };
+                    });
+            });
+
 
             return services;
         }
 
-        public static IServiceCollection AddIdentityDependenciesConfig(this IServiceCollection services, IConfiguration configuratio)
-        {
-            services.AddDbContext<DevNetCoreIdentityContext>(options =>
-            options.UseSqlServer(
-            configuratio.GetConnectionString("DevNetCoreIdentityContextConnection")));
 
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddDefaultTokenProviders().AddDefaultUI().AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<DevNetCoreIdentityContext>();
-
-            return services;
-        }
     }
 }
